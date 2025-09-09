@@ -6,9 +6,9 @@ const MovieCard = ({movie: {
   poster_path,
   release_date,
   original_language,
-}}) => {
+}, onClick}) => {
   return (
-    <div className='movie-card'>
+    <div className='movie-card cursor-pointer transition hover:scale-[1.02] hover:shadow-lg' onClick={onClick} role='button' tabIndex={0} onKeyDown={(e)=> { if(e.key==='Enter') onClick?.(); }}>
       <img src={poster_path ? `https://image.tmdb.org/t/p/w500/${poster_path}`: './no-movie.png'} alt={title}/>
       
       <div className='mt-4'>
