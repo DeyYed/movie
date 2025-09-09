@@ -8,8 +8,10 @@ const CLICKS_COLLECTION_ID = import.meta.env.VITE_APPWRITE_CLICKS_COLLECTION_ID 
 const PROJECT_ID = import.meta.env.VITE_APPWRITE_PROJECT_ID;
 
 
+const ENDPOINT = import.meta.env.VITE_APPWRITE_ENDPOINT || 'https://cloud.appwrite.io/v1';
+
 const client = new Client()
-    .setEndpoint(`https://fra.cloud.appwrite.io/v1`)
+    .setEndpoint(ENDPOINT)
     .setProject(PROJECT_ID)
 
 
