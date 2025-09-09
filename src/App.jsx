@@ -197,11 +197,13 @@ const App = () => {
         </section>
 
         {selectedMovieId && (
-          <div className='fixed inset-0 z-50 flex items-start sm:items-center justify-center bg-black/80 backdrop-blur-sm p-2 sm:p-6 overflow-y-auto' onClick={(e) => { if(e.target === e.currentTarget) closeModal(); }}>
-            <div className='relative w-full max-w-4xl bg-dark-100 rounded-2xl shadow-2xl border border-light-100/10 text-left animate-fade-in focus:outline-none'>
+          <div className='fixed inset-0 z-50 flex items-center sm:items-center justify-center bg-black/80 backdrop-blur-sm p-0 xs:p-2 sm:p-6 overflow-y-auto'
+               style={{paddingTop:'12vh'}}
+               onClick={(e) => { if(e.target === e.currentTarget) closeModal(); }} role='dialog' aria-modal='true' aria-labelledby='movie-dialog-title'>
+            <div className='relative w-full max-w-4xl bg-dark-100 rounded-none xs:rounded-2xl shadow-2xl border border-light-100/10 text-left animate-fade-in focus:outline-none max-h-[90vh] flex flex-col'>
               <button onClick={closeModal} className='absolute top-3 right-3 text-gray-100 hover:text-white text-xl font-bold'>×</button>
               {detailsLoading && (
-                <div className='p-14 flex justify-center'><Spinner /></div>
+                <div className='p-14 flex justify-center flex-1'><Spinner /></div>
               )}
               {!detailsLoading && detailsError && (
                 <div className='p-6'>
@@ -209,61 +211,61 @@ const App = () => {
                 </div>
               )}
               {!detailsLoading && movieDetails && (
-                <div className='grid md:grid-cols-3 gap-6 p-5 sm:p-8'>
-                  <div className='md:col-span-1'>
-                    <div className='sticky top-6'>
-                      <img className='rounded-xl w-full h-auto object-cover shadow-md' src={movieDetails.poster_path ? `https://image.tmdb.org/t/p/w500/${movieDetails.poster_path}` : './no-movie.png'} alt={movieDetails.title} />
+                <div className='flex-1 overflow-y-auto hide-scrollbar'>
+                  <div className='flex flex-col md:grid md:grid-cols-3 gap-6 p-4 sm:p-8'>
+                    <div className='md:col-span-1'>
+                      <img className='rounded-none xs:rounded-xl w-full h-full max-h-[380px] object-cover shadow-md' src={movieDetails.poster_path ? `https://image.tmdb.org/t/p/w500/${movieDetails.poster_path}` : './no-movie.png'} alt={movieDetails.title} />
                     </div>
-                  </div>
-                  <div className='md:col-span-2 flex flex-col gap-5'>
-                    <div>
-                      <h3 className='text-2xl sm:text-3xl font-bold text-white mb-1'>{movieDetails.title}</h3>
-                      {movieDetails.tagline && <p className='text-sm italic text-gray-100'>{movieDetails.tagline}</p>}
-                    </div>
-                    <p className='text-gray-100 text-sm leading-relaxed whitespace-pre-line'>{movieDetails.overview || 'No synopsis available.'}</p>
-                    <div className='flex flex-wrap gap-2'>
-                      {movieDetails.genres?.map(g => (
-                        <span key={g.id} className='px-2 py-1 rounded-full bg-light-100/10 text-[11px] tracking-wide text-light-100'>{g.name}</span>
-                      ))}
-                    </div>
-                    <div className='grid grid-cols-2 sm:grid-cols-3 gap-4 text-xs sm:text-sm text-gray-100'>
-                      <div><p className='uppercase tracking-wide text-gray-100/60'>Release</p><p>{movieDetails.release_date || '—'}</p></div>
-                      <div><p className='uppercase tracking-wide text-gray-100/60'>Runtime</p><p>{movieDetails.runtime ? movieDetails.runtime + ' min' : '—'}</p></div>
-                      <div><p className='uppercase tracking-wide text-gray-100/60'>Rating</p><p>{movieDetails.vote_average ? movieDetails.vote_average.toFixed(1) : 'N/A'}</p></div>
-                      <div><p className='uppercase tracking-wide text-gray-100/60'>Votes</p><p>{movieDetails.vote_count || 0}</p></div>
-                      <div><p className='uppercase tracking-wide text-gray-100/60'>Language</p><p className='uppercase'>{movieDetails.original_language}</p></div>
-                      <div><p className='uppercase tracking-wide text-gray-100/60'>Status</p><p>{movieDetails.status || '—'}</p></div>
-                    </div>
-                    {movieDetails.credits?.cast?.length > 0 && (
+                    <div className='md:col-span-2 flex flex-col gap-5'>
                       <div>
-                        <p className='text-xs uppercase tracking-wide text-gray-100/70 mb-2'>Top Cast</p>
-                        <ul className='flex gap-4 overflow-x-auto hide-scrollbar pr-2'>
-                          {movieDetails.credits.cast.slice(0,12).map(actor => (
-                            <li key={actor.cast_id} className='min-w-[80px] text-center'>
-                              <div className='w-16 h-16 mx-auto mb-1 rounded-full overflow-hidden bg-light-100/10'>
-                                {actor.profile_path ? (
-                                  <img className='w-full h-full object-cover' src={`https://image.tmdb.org/t/p/w185/${actor.profile_path}`} alt={actor.name} />
-                                ) : (
-                                  <div className='flex items-center justify-center w-full h-full text-[10px] text-gray-100'>No Img</div>
-                                )}
-                              </div>
-                              <p className='text-[10px] text-white font-medium line-clamp-2'>{actor.name}</p>
-                              <p className='text-[9px] text-gray-100 line-clamp-1'>{actor.character}</p>
-                            </li>
-                          ))}
-                        </ul>
+                        <h3 id='movie-dialog-title' className='text-2xl sm:text-3xl font-bold text-white mb-1'>{movieDetails.title}</h3>
+                        {movieDetails.tagline && <p className='text-sm italic text-gray-100'>{movieDetails.tagline}</p>}
                       </div>
-                    )}
-                    {movieDetails.videos?.results?.length > 0 && (
-                      <div>
-                        <p className='text-xs uppercase tracking-wide text-gray-100/70 mb-2'>Videos</p>
-                        <div className='flex gap-3 flex-wrap'>
-                          {movieDetails.videos.results.filter(v => v.site === 'YouTube').slice(0,3).map(v => (
-                            <a key={v.id} href={`https://www.youtube.com/watch?v=${v.key}`} target='_blank' rel='noreferrer' className='text-indigo-400 hover:underline text-xs'>▶ {v.type}</a>
-                          ))}
+                      <p className='text-gray-100 text-sm leading-relaxed whitespace-pre-line'>{movieDetails.overview || 'No synopsis available.'}</p>
+                      <div className='flex flex-wrap gap-2'>
+                        {movieDetails.genres?.map(g => (
+                          <span key={g.id} className='px-2 py-1 rounded-full bg-light-100/10 text-[11px] tracking-wide text-light-100'>{g.name}</span>
+                        ))}
+                      </div>
+                      <div className='grid grid-cols-2 sm:grid-cols-3 gap-4 text-xs sm:text-sm text-gray-100'>
+                        <div><p className='uppercase tracking-wide text-gray-100/60'>Release</p><p>{movieDetails.release_date || '—'}</p></div>
+                        <div><p className='uppercase tracking-wide text-gray-100/60'>Runtime</p><p>{movieDetails.runtime ? movieDetails.runtime + ' min' : '—'}</p></div>
+                        <div><p className='uppercase tracking-wide text-gray-100/60'>Rating</p><p>{movieDetails.vote_average ? movieDetails.vote_average.toFixed(1) : 'N/A'}</p></div>
+                        <div><p className='uppercase tracking-wide text-gray-100/60'>Votes</p><p>{movieDetails.vote_count || 0}</p></div>
+                        <div><p className='uppercase tracking-wide text-gray-100/60'>Language</p><p className='uppercase'>{movieDetails.original_language}</p></div>
+                        <div><p className='uppercase tracking-wide text-gray-100/60'>Status</p><p>{movieDetails.status || '—'}</p></div>
+                      </div>
+                      {movieDetails.credits?.cast?.length > 0 && (
+                        <div>
+                          <p className='text-xs uppercase tracking-wide text-gray-100/70 mb-2'>Top Cast</p>
+                          <ul className='flex gap-4 overflow-x-auto hide-scrollbar pr-2 pb-2'>
+                            {movieDetails.credits.cast.slice(0,12).map(actor => (
+                              <li key={actor.cast_id} className='min-w-[70px] text-center'>
+                                <div className='w-14 h-14 mx-auto mb-1 rounded-full overflow-hidden bg-light-100/10'>
+                                  {actor.profile_path ? (
+                                    <img className='w-full h-full object-cover' src={`https://image.tmdb.org/t/p/w185/${actor.profile_path}`} alt={actor.name} />
+                                  ) : (
+                                    <div className='flex items-center justify-center w-full h-full text-[9px] text-gray-100'>No Img</div>
+                                  )}
+                                </div>
+                                <p className='text-[10px] text-white font-medium line-clamp-2'>{actor.name}</p>
+                                <p className='text-[9px] text-gray-100 line-clamp-1'>{actor.character}</p>
+                              </li>
+                            ))}
+                          </ul>
                         </div>
-                      </div>
-                    )}
+                      )}
+                      {movieDetails.videos?.results?.length > 0 && (
+                        <div>
+                          <p className='text-xs uppercase tracking-wide text-gray-100/70 mb-2'>Videos</p>
+                          <div className='flex gap-3 flex-wrap'>
+                            {movieDetails.videos.results.filter(v => v.site === 'YouTube').slice(0,3).map(v => (
+                              <a key={v.id} href={`https://www.youtube.com/watch?v=${v.key}`} target='_blank' rel='noreferrer' className='text-indigo-400 hover:underline text-xs'>▶ {v.type}</a>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               )}
