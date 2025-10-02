@@ -141,6 +141,104 @@
       @apply text-gray-100 font-medium text-base;
     }
   }
+
+  .pagination-container {
+    @apply mt-8 flex flex-col items-center gap-4;
+  }
+
+  .pagination-info {
+    @apply text-center;
+  }
+
+  .pagination-controls {
+    @apply flex items-center gap-2 flex-wrap justify-center;
+  }
+
+  .pagination-numbers {
+    @apply flex items-center gap-1;
+  }
+
+  .pagination-btn {
+    @apply px-3 py-2 text-sm font-medium rounded-lg transition-colors duration-200 border;
+  }
+
+  .pagination-btn-nav {
+    @apply bg-dark-100 text-white border-light-100/20 hover:bg-light-100/10 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .pagination-btn-number {
+    @apply bg-dark-100 text-white border-light-100/20 hover:bg-light-100/10 min-w-[40px];
+  }
+
+  .pagination-btn-number.active {
+    @apply bg-light-100/20 text-white border-light-100/40;
+  }
+
+  .pagination-ellipsis {
+    @apply px-2 py-2 text-sm text-gray-400;
+  }
+
+  .swipeable-cast {
+    @apply relative;
+  }
+
+  .cast-header {
+    @apply flex items-center justify-between mb-2;
+  }
+
+  .cast-navigation {
+    @apply flex gap-2;
+  }
+
+  .cast-nav-btn {
+    @apply w-8 h-8 rounded-full bg-light-100/10 text-white hover:bg-light-100/20 disabled:opacity-30 disabled:cursor-not-allowed transition-colors duration-200 flex items-center justify-center text-lg font-bold;
+  }
+
+  .cast-container {
+    @apply overflow-hidden rounded-lg relative;
+    user-select: none;
+  }
+
+  .cast-slider {
+    @apply flex gap-4;
+    width: fit-content;
+  }
+
+  .cast-item {
+    @apply min-w-[70px] text-center flex-shrink-0;
+  }
+
+  .cast-avatar {
+    @apply w-14 h-14 mx-auto mb-1 rounded-full overflow-hidden bg-light-100/10;
+  }
+
+  .cast-image {
+    @apply w-full h-full object-cover;
+  }
+
+  .cast-placeholder {
+    @apply flex items-center justify-center w-full h-full text-[9px] text-gray-100;
+  }
+
+  .cast-name {
+    @apply text-[10px] text-white font-medium line-clamp-2 mb-1;
+  }
+
+  .cast-character {
+    @apply text-[9px] text-gray-100 line-clamp-1;
+  }
+
+  .cast-indicators {
+    @apply flex justify-center gap-2 mt-3;
+  }
+
+  .cast-indicator {
+    @apply w-2 h-2 rounded-full bg-light-100/20 hover:bg-light-100/40 transition-colors duration-200;
+  }
+
+  .cast-indicator.active {
+    @apply bg-light-100/60;
+  }
 }
 
 @utility text-gradient {

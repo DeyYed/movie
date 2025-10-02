@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import Search from './components/Search';
 import Spinner from './components/Spinner';
 import MovieCard from './components/MovieCard';
+import Pagination from './components/Pagination';
+import SwipeableCast from './components/SwipeableCast';
 import { useDebounce } from 'react-use';  
 import {getTrendingMovies, updateSearchCount, updateClickCount, updatePosterUrl} from './appwrite.js'; // trending now based on click collection
 
@@ -41,13 +43,18 @@ const App = () => {
   const [detailsLoading, setDetailsLoading] = useState(false)
   const [detailsError, setDetailsError] = useState('')
   const [detailsCache, setDetailsCache] = useState({}) // id -> details
+  
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+  const [totalResults, setTotalResults] = useState(0)
 
-  useDebounce(() =>
-    setdebouncedSearch(searchTerm), 500, [searchTerm]
-  )
+  useDebounce(() => {
+    setdebouncedSearch(searchTerm);
+  }, 500, [searchTerm]);
   
 
-  const fetchMovies = async (query) => {
+  const fetchMovies = async (query, page = 1) => {
     setIsLoading(true);
     seterrorMessage('');
     try {
@@ -55,8 +62,8 @@ const App = () => {
         throw new Error('Missing TMDB API key. Set VITE_TMDB_API_KEY in your .env');
       }
       const endpoint = query
-        ? buildEndpoint(`/search/movie?query=${encodeURIComponent(query)}`)
-        : buildEndpoint('/discover/movie?sort_by=popularity.desc');
+        ? buildEndpoint(`/search/movie?query=${encodeURIComponent(query)}&page=${page}`)
+        : buildEndpoint(`/discover/movie?sort_by=popularity.desc&page=${page}`);
 
       const response = await fetch(endpoint, { method: 'GET', headers: buildHeaders() });
       if(response.status === 401){
@@ -74,6 +81,10 @@ const App = () => {
         return;
       }
       setMovieList(data.results || []);
+      // TMDB API has a maximum of 500 pages
+      setTotalPages(Math.min(data.total_pages || 1, 500));
+      setTotalResults(data.total_results || 0);
+      setCurrentPage(page);
 
       if(query && data.results.length > 0){
         await updateSearchCount(query, data.results[0]);
@@ -141,6 +152,30 @@ const App = () => {
     setDetailsError('');
   }
 
+  // Pagination handlers
+  const handlePageChange = (page) => {
+    if (page >= 1 && page <= totalPages) {
+      fetchMovies(debouncedSearch, page);
+      // Scroll to top of the movies section
+      const moviesSection = document.querySelector('.all-movies');
+      if (moviesSection) {
+        moviesSection.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+  }
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      handlePageChange(currentPage + 1);
+    }
+  }
+
+  const handlePreviousPage = () => {
+    if (currentPage > 1) {
+      handlePageChange(currentPage - 1);
+    }
+  }
+
   useEffect(() => {
     const handleEsc = (e) => {
       if(e.key === 'Escape') closeModal();
@@ -149,7 +184,9 @@ const App = () => {
     return () => window.removeEventListener('keydown', handleEsc);
   }, []);
   useEffect(() => {
-    fetchMovies(debouncedSearch);
+    // Reset to page 1 when search term changes
+    setCurrentPage(1);
+    fetchMovies(debouncedSearch, 1);
   }, [debouncedSearch]);
 
   useEffect(() => {
@@ -188,11 +225,24 @@ const App = () => {
           ) : errorMessage ? (
             <p className='text-red-500'>{errorMessage}</p>
           ) : (
-            <ul>
-              {movieList.map((movie) => (
-                <MovieCard key={movie.id} movie={movie} onClick={() => openMovieModal(movie)} />
-              ))}
-            </ul>
+            <>
+              <ul>
+                {movieList.map((movie) => (
+                  <MovieCard key={movie.id} movie={movie} onClick={() => openMovieModal(movie)} />
+                ))}
+              </ul>
+              
+              {movieList.length > 0 && (
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  totalResults={totalResults}
+                  onPageChange={handlePageChange}
+                  onNextPage={handleNextPage}
+                  onPreviousPage={handlePreviousPage}
+                />
+              )}
+            </>
           )}   
         </section>
 
@@ -236,24 +286,7 @@ const App = () => {
                         <div><p className='uppercase tracking-wide text-gray-100/60'>Status</p><p>{movieDetails.status || '—'}</p></div>
                       </div>
                       {movieDetails.credits?.cast?.length > 0 && (
-                        <div>
-                          <p className='text-xs uppercase tracking-wide text-gray-100/70 mb-2'>Top Cast</p>
-                          <ul className='flex gap-4 overflow-x-auto hide-scrollbar pr-2 pb-2'>
-                            {movieDetails.credits.cast.slice(0,12).map(actor => (
-                              <li key={actor.cast_id} className='min-w-[70px] text-center'>
-                                <div className='w-14 h-14 mx-auto mb-1 rounded-full overflow-hidden bg-light-100/10'>
-                                  {actor.profile_path ? (
-                                    <img className='w-full h-full object-cover' src={`https://image.tmdb.org/t/p/w185/${actor.profile_path}`} alt={actor.name} />
-                                  ) : (
-                                    <div className='flex items-center justify-center w-full h-full text-[9px] text-gray-100'>No Img</div>
-                                  )}
-                                </div>
-                                <p className='text-[10px] text-white font-medium line-clamp-2'>{actor.name}</p>
-                                <p className='text-[9px] text-gray-100 line-clamp-1'>{actor.character}</p>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
+                        <SwipeableCast cast={movieDetails.credits.cast} />
                       )}
                       {movieDetails.videos?.results?.length > 0 && (
                         <div>
