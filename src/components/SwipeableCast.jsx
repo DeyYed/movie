@@ -7,7 +7,9 @@ const SwipeableCast = ({ cast }) => {
   const [translateX, setTranslateX] = useState(0)
   const [itemsPerView, setItemsPerView] = useState(4)
   const containerRef = useRef(null)
-  const maxIndex = Math.max(0, Math.ceil(cast.length / itemsPerView) - 1)
+  // Limit to 12 cast members max
+  const displayedCastCount = Math.min(cast.length, 12)
+  const maxIndex = Math.max(0, Math.ceil(displayedCastCount / itemsPerView) - 1)
 
   // Update items per view based on screen size
   useEffect(() => {
@@ -26,6 +28,13 @@ const SwipeableCast = ({ cast }) => {
     window.addEventListener('resize', updateItemsPerView)
     return () => window.removeEventListener('resize', updateItemsPerView)
   }, [])
+
+  // Reset current index if it exceeds maxIndex
+  useEffect(() => {
+    if (currentIndex > maxIndex) {
+      setCurrentIndex(maxIndex)
+    }
+  }, [maxIndex, currentIndex])
 
   const handleMouseDown = (e) => {
     setIsDragging(true)
